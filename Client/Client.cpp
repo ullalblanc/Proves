@@ -4,10 +4,15 @@
 
 #include "Game.h"
 
+#define SpriteVelocityBot 0.05
+#define SpriteVelocityTop 0.05
+
 // 1_i_x_y // WELCOME_id_x // Welcome al client, amb la seva id i posicions
 // 2_i_x_y // POSITION_id_x // Posicio del jugador id
 // 3 // Ping
 // Protocol: https://docs.google.com/spreadsheets/d/152EPpd8-f7fTDkZwQlh1OCY5kjCTxg6-iZ2piXvEgeg/edit?usp=sharing
+
+int FoggOffset = 0;
 
 enum State {
 	connect,	// Per conectarse al servidor
@@ -16,6 +21,7 @@ enum State {
 	points,		// Envia les puntuacions als jugadors y actualitza els seus logs
 	win			// el joc sacaba
 };
+
 
 int main()
 {
@@ -75,6 +81,32 @@ int main()
 	}
 	sf::Sprite fons; // fons
 	fons.setTexture(texture);
+	//gespa
+	sf::Texture gespaText;
+	if (!gespaText.loadFromFile("../Resources/front.png")) { //FALLA AQUI
+		std::cout << "Can't load the image file" << std::endl;
+		return -1;
+	}
+	sf::Sprite herba; // fons
+	herba.setTexture(gespaText);
+	herba.setPosition(0, 600);
+	
+	//boira
+
+
+
+
+	sf::Texture BoiraText;
+	if (!BoiraText.loadFromFile("../Resources/moviment.png")) {
+		std::cout << "Can't load the image file" << std::endl;
+		return -1;
+	}
+	sf::Sprite Boira; // fons
+	Boira.setTexture(BoiraText);
+	sf::Sprite Boira2; // fons
+	Boira2.setTexture(BoiraText);
+
+
 
 	//Jugador 1 
 	//TOP
@@ -144,7 +176,7 @@ int main()
 	
 
 	// set up AnimatedSprite
-	AnimatedSprite p1Top(sf::seconds(0.2), true, false); //(sf::Time frameTime, bool paused, bool looped)
+	AnimatedSprite p1Top(sf::seconds(SpriteVelocityTop), true, false); //(sf::Time frameTime, bool paused, bool looped)
 	p1Top.setPosition(sf::Vector2f(800-325,150));
 	p1Top.play(idleAnimation1T);
 
@@ -176,8 +208,113 @@ int main()
 
 
 	// set up AnimatedSprite
-	AnimatedSprite p1Bot(sf::seconds(0.2), true, false); //(sf::Time frameTime, bool paused, bool looped)
+	AnimatedSprite p1Bot(sf::seconds(SpriteVelocityBot), true, false); //(sf::Time frameTime, bool paused, bool looped)
 	p1Bot.setPosition(sf::Vector2f(800 - 325, 150+275)); //275 d'alçada per compensar amb la cintura
+	p1Bot.play(idleAnimation1B);
+
+	//Jugador 2 
+	//TOP
+
+	sf::Texture p2TextTop;
+	if (!p2TextTop.loadFromFile("../Resources/SpriteJugadorDreta.png")) {
+		std::cout << "Can't load the image file" << std::endl;
+		return -1;
+	}
+	//Animation idle
+	Animation idleAnimation2T;
+	idleAnimation2T.setSpriteSheet(p2TextTop);
+	idleAnimation2T.addFrame(sf::IntRect(0, 0, 650, 650));
+
+	//Animacio attack top player 1
+	Animation attackAnimationTop2T;
+	attackAnimationTop2T.setSpriteSheet(p2TextTop);
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 1, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 2, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 3, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 4, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 5, 0, 650, 650));//5
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 6, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 7, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 8, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 9, 0, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 0, 652, 650, 650));//10
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 1, 652, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 2, 652, 650, 650));
+	attackAnimationTop2T.addFrame(sf::IntRect(652 * 3, 652, 650, 650));
+
+	//Animacio attack mid player 1
+	Animation attackAnimationMid2T;
+	attackAnimationMid2T.setSpriteSheet(p2TextTop);
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 4, 652, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 5, 652, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 6, 652, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 7, 652, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 8, 652, 650, 650));//5
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 9, 652, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 0, 652 * 2, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 1, 652 * 2, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 2, 652 * 2, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 3, 652 * 2, 650, 650));//10
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 4, 652 * 2, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 5, 652 * 2, 650, 650));
+	attackAnimationMid2T.addFrame(sf::IntRect(652 * 6, 652 * 2, 650, 650));
+
+	//Animacio attack bot player 1
+	Animation attackAnimationBot2T;
+	attackAnimationBot2T.setSpriteSheet(p2TextTop);
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 7, 652 * 2, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 8, 652 * 2, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 9, 652 * 2, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 0, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 1, 652 * 3, 650, 650));//5
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 2, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 3, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 4, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 5, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 6, 652 * 3, 650, 650));//10
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 7, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 8, 652 * 3, 650, 650));
+	attackAnimationBot2T.addFrame(sf::IntRect(652 * 9, 652 * 3, 650, 650));
+
+	//Animation* currentAnimation1T = &idleAnimation2T;
+
+
+	// set up AnimatedSprite
+	AnimatedSprite p2Top(sf::seconds(SpriteVelocityTop), true, false); //(sf::Time frameTime, bool paused, bool looped)
+	p2Top.setPosition(sf::Vector2f(800 - 325, 150));
+	p2Top.play(idleAnimation2T);
+
+	//Bot
+	sf::Texture p2TextBot;
+	if (!p2TextBot.loadFromFile("../Resources/PassosDreta.png")) {
+		std::cout << "Can't load the image file" << std::endl;
+		return -1;
+	}
+	//Animation idle
+	Animation idleAnimation2B;
+	idleAnimation2B.setSpriteSheet(p2TextBot);
+	idleAnimation2B.addFrame(sf::IntRect(0, 0, 500, 380));
+
+	//Animation Pas Ofensiu
+	Animation pas2B;
+	pas2B.setSpriteSheet(p2TextBot);
+	pas2B.addFrame(sf::IntRect(502 * 1, 382 * 0, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 0, 382 * 1, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 1, 382 * 1, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 0, 382 * 2, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 1, 382 * 2, 500, 380));//-·--·--·--
+	pas2B.addFrame(sf::IntRect(502 * 0, 382 * 2, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 1, 382 * 1, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 0, 382 * 1, 500, 380));
+	pas2B.addFrame(sf::IntRect(502 * 1, 382 * 0, 500, 380));
+
+	//Animation* currentAnimation1B = &idleAnimation1B;
+
+
+	// set up AnimatedSprite
+	AnimatedSprite p2Bot(sf::seconds(SpriteVelocityBot), true, false); //(sf::Time frameTime, bool paused, bool looped)
+	p2Bot.setPosition(sf::Vector2f(800 - 325, 150 + 275)); //275 d'alçada per compensar amb la cintura
+	p2Bot.play(idleAnimation2B);
 
 
 
@@ -258,6 +395,7 @@ int main()
 				playertmp.x += 2;
 				//currentAnimation1T = &attackAnimationTop1T;
 				p1Bot.play(pas1B);
+				p2Bot.play(pas2B);
 
 			}
 			if (key.isKeyPressed(sf::Keyboard::Left)) {
@@ -296,16 +434,35 @@ int main()
 		}
 
 		window.draw(fons);	// Pintem el fons
+		FoggOffset++;
+		if (FoggOffset * 0.3 >= 1600) {
+			FoggOffset = 0;
+		}
+		else {
+			Boira.setPosition(1600 - FoggOffset * 0.3, 0);
+		}
+		Boira2.setPosition(-FoggOffset * 0.3, 0);
 
+		window.draw(Boira);
+		window.draw(Boira2);
 		//if (player.size() > 0) { 
 			//p1Bot.play(*currentAnimation1B);
+			
+			p2Bot.update(frameTime);
+			p2Bot.setPosition(playertmp.x+150, 150 + 275); //Aquests 150 en x son la desviació del sprite de les cames
+			window.draw(p2Bot);
+			//
 			p1Bot.update(frameTime);
 			p1Bot.setPosition(playertmp.x, 150 + 275);
 			window.draw(p1Bot);
 			//p1Top.play(*currentAnimation1T);
 			p1Top.update(frameTime);
 			p1Top.setPosition(playertmp.x, 150);
-			window.draw(p1Top); // pintem el jugador
+			window.draw(p1Top);
+			
+			p2Top.update(frameTime);
+			p2Top.setPosition(playertmp.x, 150);
+			window.draw(p2Top);// pintem el jugador
 			//if (player.size() > 1) {
 				/*for (int i = 1; i < player.size(); i++)
 				{
@@ -313,7 +470,11 @@ int main()
 					window.draw(fucsia); // pintem el enemic
 				}*/
 			//}
-	//	}
+	//	}//Niebla
+
+
+		window.draw(herba);
+		
 		window.display();		// Mostrem per la finestra
 		window.clear();			// Netejem finestra
 	}
@@ -321,3 +482,4 @@ int main()
 	//thread.terminate();
 	return 0;
 }
+
