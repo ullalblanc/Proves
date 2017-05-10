@@ -7,12 +7,18 @@
 #define SpriteVelocityBot 0.05
 #define SpriteVelocityTop 0.05
 
+#define DISTANCIA_BODY 90
+#define DISTANCIA_ATTACK 110
+
 // 1_i_x_y // WELCOME_id_x // Welcome al client, amb la seva id i posicions
 // 2_i_x_y // POSITION_id_x // Posicio del jugador id
 // 3 // Ping
 // Protocol: https://docs.google.com/spreadsheets/d/152EPpd8-f7fTDkZwQlh1OCY5kjCTxg6-iZ2piXvEgeg/edit?usp=sharing
 
 int FoggOffset = 0;
+
+bool distancia=false;
+bool distanciaAtac=false;
 
 enum State {
 	connect,	// Per conectarse al servidor
@@ -63,9 +69,14 @@ int main()
 	Timer timerConnect;			// timer per intentar conectarse a servidor	
 	State state = play;		// Comencem en connect per que es conecti al server
 	Player playertmp;			// Amb el tmp es guardara a ell mateix i als altres en el vector player
+	Player playerEnemy; //El player enemic
 
-	playertmp.x = -50;
-	playertmp.y = 750;
+	playertmp.x = 270;
+	playertmp.y = 150;
+
+	playerEnemy.x = 800;
+	playerEnemy.y = 150;
+
 	//player.push_back(playertmp);
 	//player.push_back(playertmp);
 
@@ -177,7 +188,7 @@ int main()
 
 	// set up AnimatedSprite
 	AnimatedSprite p1Top(sf::seconds(SpriteVelocityTop), true, false); //(sf::Time frameTime, bool paused, bool looped)
-	p1Top.setPosition(sf::Vector2f(800-325,150));
+	p1Top.setPosition(sf::Vector2f(playertmp.x-325,playertmp.y));
 	p1Top.play(idleAnimation1T);
 
 	//Bot
@@ -209,7 +220,7 @@ int main()
 
 	// set up AnimatedSprite
 	AnimatedSprite p1Bot(sf::seconds(SpriteVelocityBot), true, false); //(sf::Time frameTime, bool paused, bool looped)
-	p1Bot.setPosition(sf::Vector2f(800 - 325, 150+275)); //275 d'alçada per compensar amb la cintura
+	p1Bot.setPosition(sf::Vector2f(playertmp.x - 325, playertmp.y+275)); //275 d'alçada per compensar amb la cintura
 	p1Bot.play(idleAnimation1B);
 
 	//Jugador 2 
@@ -281,7 +292,7 @@ int main()
 
 	// set up AnimatedSprite
 	AnimatedSprite p2Top(sf::seconds(SpriteVelocityTop), true, false); //(sf::Time frameTime, bool paused, bool looped)
-	p2Top.setPosition(sf::Vector2f(800 - 325, 150));
+	p2Top.setPosition(sf::Vector2f(playerEnemy.x - 325, playerEnemy.y));
 	p2Top.play(idleAnimation2T);
 
 	//Bot
@@ -313,7 +324,7 @@ int main()
 
 	// set up AnimatedSprite
 	AnimatedSprite p2Bot(sf::seconds(SpriteVelocityBot), true, false); //(sf::Time frameTime, bool paused, bool looped)
-	p2Bot.setPosition(sf::Vector2f(800 - 325, 150 + 275)); //275 d'alçada per compensar amb la cintura
+	p2Bot.setPosition(sf::Vector2f(playerEnemy.x - 325, playerEnemy.y + 275)); //275 d'alçada per compensar amb la cintura
 	p2Bot.play(idleAnimation2B);
 
 
@@ -334,11 +345,11 @@ int main()
 	fucsia.setTexture(texture3);
 	fucsia.setOrigin(20, 20);
 
-	sf::Font font;
+	/*sf::Font font;
 	if (!font.loadFromFile("cour.ttf"))
 	{
 		std::cout << "Can't load the font file" << std::endl;
-	}
+	}*/
 
 	sf::Vector2i screenDimensions(1600, 900);											// Dimensions pantalles
 	sf::RenderWindow window;															// Creem la finestra del joc
@@ -389,21 +400,43 @@ int main()
 			break;
 		case play:
 			
+			sf::Event event;
+			while (window.pollEvent(event))
+			{
+				if (event.type == sf::Event::Closed)
+					window.close();
+				if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+					window.close();
+			}
 
 			sf::Keyboard key;
 			if (key.isKeyPressed(sf::Keyboard::Right)) {
 				playertmp.x += 2;
 				//currentAnimation1T = &attackAnimationTop1T;
 				p1Bot.play(pas1B);
-				p2Bot.play(pas2B);
-
 			}
 			if (key.isKeyPressed(sf::Keyboard::Left)) {
 				playertmp.x -= 2;
-				//currentAnimation1T = &attackAnimationTop1T;
+				p1Bot.play(pas1B);
+			}
+			if (key.isKeyPressed(sf::Keyboard::Q)) {
+				
 				p1Top.play(attackAnimationTop1T);
 
+			}	if (key.isKeyPressed(sf::Keyboard::W)) {
+				playertmp.x -= 2;
+				//currentAnimation1T = &attackAnimationTop1T;
+				p1Top.play(attackAnimationMid1T);
+
+			}	if (key.isKeyPressed(sf::Keyboard::E)) {
+				playertmp.x -= 2;
+				//currentAnimation1T = &attackAnimationTop1T;
+				p1Top.play(attackAnimationBot1T);
 			}
+
+
+
+
 			//if (!serverCommands.empty()) {
 			//	switch (protocol.GetType(serverCommands.front())) {
 
@@ -425,6 +458,29 @@ int main()
 
 			//	}
 			//}
+
+			//Check de distancies
+
+			if (playertmp.x - playerEnemy.x>DISTANCIA_BODY) {
+				distancia = true;
+			}
+			else {
+				distancia = false;
+			}
+
+			if (playerEnemy.x - playertmp.x>DISTANCIA_ATTACK) {
+				distanciaAtac = true;
+			}
+			else {
+				distanciaAtac = false;
+			}
+
+			if (p1Top.m_currentFrame == 12 && distanciaAtac) {
+				p1Top.pause();
+				std::cout << "Hit!!" << std::endl; //Anem per aqui
+
+			}
+
 			break;
 
 		case points:
@@ -448,9 +504,6 @@ int main()
 		//if (player.size() > 0) { 
 			//p1Bot.play(*currentAnimation1B);
 			
-			p2Bot.update(frameTime);
-			p2Bot.setPosition(playertmp.x+150, 150 + 275); //Aquests 150 en x son la desviació del sprite de les cames
-			window.draw(p2Bot);
 			//
 			p1Bot.update(frameTime);
 			p1Bot.setPosition(playertmp.x, 150 + 275);
@@ -460,8 +513,13 @@ int main()
 			p1Top.setPosition(playertmp.x, 150);
 			window.draw(p1Top);
 			
+			//P2
+			p2Bot.update(frameTime);
+			p2Bot.setPosition(playerEnemy.x + 150, playerEnemy.y + 275); //Aquests 150 en x son la desviació del sprite de les cames
+			window.draw(p2Bot);
+
 			p2Top.update(frameTime);
-			p2Top.setPosition(playertmp.x, 150);
+			p2Top.setPosition(playerEnemy.x, playerEnemy.y);
 			window.draw(p2Top);// pintem el jugador
 			//if (player.size() > 1) {
 				/*for (int i = 1; i < player.size(); i++)
