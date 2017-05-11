@@ -6,9 +6,10 @@
 
 #define SpriteVelocityBot 0.05
 #define SpriteVelocityTop 0.05
+#define SpriteVelocityBlock 0.07
 
-#define DISTANCIA_BODY 90
-#define DISTANCIA_ATTACK 110
+#define DISTANCIA_BODY 70
+#define DISTANCIA_ATTACK 150
 
 // 1_i_x_y // WELCOME_id_x // Welcome al client, amb la seva id i posicions
 // 2_i_x_y // POSITION_id_x // Posicio del jugador id
@@ -16,6 +17,8 @@
 // Protocol: https://docs.google.com/spreadsheets/d/152EPpd8-f7fTDkZwQlh1OCY5kjCTxg6-iZ2piXvEgeg/edit?usp=sharing
 
 int FoggOffset = 0;
+int DireccioAtacJugador1 = 0; // 0=Idle 1=Top 2=Mid 3=Bot
+int DireccioAtacJugador2 = 0; // 0=Idle 1=Top 2=Mid 3=Bot
 
 bool distancia=false;
 bool distanciaAtac=false;
@@ -183,6 +186,18 @@ int main()
 	attackAnimationBot1T.addFrame(sf::IntRect(652 * 8, 652 * 3, 650, 650));
 	attackAnimationBot1T.addFrame(sf::IntRect(652 * 9, 652 * 3, 650, 650));
 
+	//Animacio Bloqueig
+	Animation BlockAnimation1T;
+	BlockAnimation1T.setSpriteSheet(p1TextTop);
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 2, 0, 650, 650));
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 3, 0, 650, 650));
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 4, 0, 650, 650));
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 5, 0, 650, 650));
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 6, 0, 650, 650));//5
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 7, 0, 650, 650));
+	BlockAnimation1T.addFrame(sf::IntRect(652 * 8, 0, 650, 650));
+
+
 	//Animation* currentAnimation1T = &idleAnimation1T;
 	
 
@@ -287,6 +302,18 @@ int main()
 	attackAnimationBot2T.addFrame(sf::IntRect(652 * 8, 652 * 3, 650, 650));
 	attackAnimationBot2T.addFrame(sf::IntRect(652 * 9, 652 * 3, 650, 650));
 
+	//Animacio Bloqueig
+	Animation BlockAnimation2T;
+	BlockAnimation2T.setSpriteSheet(p2TextTop);
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 2, 0, 650, 650));
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 3, 0, 650, 650));
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 4, 0, 650, 650));
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 5, 0, 650, 650));
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 6, 0, 650, 650));//5
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 7, 0, 650, 650));
+	BlockAnimation2T.addFrame(sf::IntRect(652 * 8, 0, 650, 650));
+
+
 	//Animation* currentAnimation1T = &idleAnimation2T;
 
 
@@ -360,6 +387,15 @@ int main()
 
 	while (window.isOpen())
 	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+				window.close();
+		}
+
 		sf::Time frameTime = frameClock.restart();
 		switch (state) {
 		case connect:
@@ -399,42 +435,63 @@ int main()
 		case send:
 			break;
 		case play:
-			
-			sf::Event event;
-			while (window.pollEvent(event))
-			{
-				if (event.type == sf::Event::Closed)
-					window.close();
-				if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
-					window.close();
-			}
+		/*	std::cout << "Hit!!" << std::endl;
+			std::cout << "Hit!!" << std::endl;
+			std::cout << "Hit!!" << std::endl;*/
+
 
 			sf::Keyboard key;
 			if (key.isKeyPressed(sf::Keyboard::Right)) {
-				playertmp.x += 2;
-				//currentAnimation1T = &attackAnimationTop1T;
-				p1Bot.play(pas1B);
+				if(!(playerEnemy.x - (playertmp.x+2)<DISTANCIA_BODY)){
+					playertmp.x += 2;
+					p1Bot.play(pas1B);
+				}
 			}
 			if (key.isKeyPressed(sf::Keyboard::Left)) {
-				playertmp.x -= 2;
-				p1Bot.play(pas1B);
-			}
-			if (key.isKeyPressed(sf::Keyboard::Q)) {
+				if (!(playerEnemy.x - (playertmp.x - 2)<DISTANCIA_BODY)) {
+					playertmp.x -= 2;
+					p1Bot.play(pas1B);
+
+				}
+			
 				
-				p1Top.play(attackAnimationTop1T);
-
-			}	if (key.isKeyPressed(sf::Keyboard::W)) {
-				playertmp.x -= 2;
-				//currentAnimation1T = &attackAnimationTop1T;
-				p1Top.play(attackAnimationMid1T);
-
-			}	if (key.isKeyPressed(sf::Keyboard::E)) {
-				playertmp.x -= 2;
-				//currentAnimation1T = &attackAnimationTop1T;
-				p1Top.play(attackAnimationBot1T);
 			}
 
+			if (!p1Top.isPlaying()) { //Per no cancelar las animacions Cooldown animacions
+				DireccioAtacJugador1 = 0;
+				p1Top.setFrameTime(sf::seconds(SpriteVelocityTop));
 
+				if (key.isKeyPressed(sf::Keyboard::Q)) {
+					DireccioAtacJugador1 = 1;
+					p1Top.play(attackAnimationTop1T);
+
+				}	if (key.isKeyPressed(sf::Keyboard::W)) {
+					DireccioAtacJugador1 = 2;
+					p1Top.play(attackAnimationMid1T);
+
+				}	if (key.isKeyPressed(sf::Keyboard::E)) {
+					DireccioAtacJugador1 = 3;
+					p1Top.play(attackAnimationBot1T);
+				}
+			}
+
+			if (!p2Top.isPlaying()) { //Per no cancelar las animacions Cooldown animacions
+				DireccioAtacJugador2 = 0;
+				p2Top.setFrameTime(sf::seconds(SpriteVelocityTop));
+
+				if (key.isKeyPressed(sf::Keyboard::A)) {
+					DireccioAtacJugador2 = 1;
+					p2Top.play(attackAnimationTop2T);
+
+				}	if (key.isKeyPressed(sf::Keyboard::S)) {
+					DireccioAtacJugador2 = 2;
+					p2Top.play(attackAnimationMid2T);
+
+				}	if (key.isKeyPressed(sf::Keyboard::D)) {
+					DireccioAtacJugador2 = 3;
+					p2Top.play(attackAnimationBot2T);
+				}
+			}
 
 
 			//if (!serverCommands.empty()) {
@@ -461,23 +518,50 @@ int main()
 
 			//Check de distancies
 
-			if (playertmp.x - playerEnemy.x>DISTANCIA_BODY) {
+			if (playerEnemy.x - playertmp.x<DISTANCIA_BODY) {
 				distancia = true;
 			}
 			else {
 				distancia = false;
 			}
 
-			if (playerEnemy.x - playertmp.x>DISTANCIA_ATTACK) {
+			if (playerEnemy.x - playertmp.x<DISTANCIA_ATTACK) {
 				distanciaAtac = true;
 			}
 			else {
 				distanciaAtac = false;
 			}
+			// MOMENT DE L'ATAC
+			if ((p1Top.m_currentFrame == 12 || p2Top.m_currentFrame == 12) && distanciaAtac) { //Xequejem colliders al atacar
+				if (p1Top.m_currentFrame == 12) { //Jugador inicia el atac //Activar animacio de Bloqueig canviar timing per el jugador que bolequeja
+					if (DireccioAtacJugador2 == DireccioAtacJugador1) {
+						p1Top.setFrameTime(sf::seconds (SpriteVelocityBlock));
+						p1Top.play(BlockAnimation1T);
+						p2Top.play(BlockAnimation2T);
+						std::cout << "Jugador 2 bloqueja" << std::endl;
+							
+					}
+					else { //JUGADOR 1 Guanya
+						p1Top.pause();
+						state = points;
+						std::cout << "guanya jugador 1" << std::endl;
+					}
+				}
+				else { // Jugador dos inicia el atac
+					if (DireccioAtacJugador2 == DireccioAtacJugador1) {
+						p2Top.setFrameTime(sf::seconds(SpriteVelocityBlock));
+						p1Top.play(BlockAnimation1T);
+						p2Top.play(BlockAnimation2T);
+						std::cout << "Jugador 1 bloqueja" << std::endl;
 
-			if (p1Top.m_currentFrame == 12 && distanciaAtac) {
-				p1Top.pause();
-				std::cout << "Hit!!" << std::endl; //Anem per aqui
+					}
+					else { //JUGADOR 1 Guanya
+						p2Top.pause();
+						state = points;
+						std::cout << "guanya jugador 2" << std::endl;
+					}
+				}
+				
 
 			}
 
